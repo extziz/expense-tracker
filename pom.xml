@@ -9,7 +9,7 @@
 		<relativePath/> <!-- lookup parent from repository -->
 	</parent>
 	<groupId>com.project</groupId>
-	<artifactId>expensetracker</artifactId>
+	<artifactId>expense-tracker</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
 	<name>expensetracker</name>
 	<description>My project for learning</description>

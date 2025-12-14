@@ -1,4 +1,4 @@
-package com.project.expensetracker.controller;
+package com.project.expense_tracker.controller;
 
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
