@@ -18,6 +18,9 @@ public class Category {
     @Column(length = 7)
     private String color;
 
+    @Column(length = 300)
+    private String description;
+
     @Column(name = "created_at")
     private LocalDateTime createdAt;
 
@@ -29,9 +32,10 @@ public class Category {
     // Constructors
     public Category() {}
 
-    public Category(String name, String color) {
+    public Category(String name, String color, String description) {
         this.name = name;
         this.color = color;
+        this.description = description;
     }
 
     // Getters and Setters
@@ -57,6 +61,14 @@ public class Category {
 
     public void setColor(String color) {
         this.color = color;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String id) {
+        this.description = description;
     }
 
     public LocalDateTime getCreatedAt() {
