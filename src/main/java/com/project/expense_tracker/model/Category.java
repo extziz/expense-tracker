@@ -1,6 +1,7 @@
 package com.project.expense_tracker.model;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.*;
 
 import java.time.LocalDateTime;
 
@@ -12,12 +13,16 @@ public class Category {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @NotBlank(message = "Category name is required")
+    @Size(min = 2, max = 50, message = "Category name must be between 2 and 50 characters")
     @Column(nullable = false, unique = true, length = 50)
     private String name;
 
+    @Pattern(regexp = "^#[0-9A-Fa-f]{6}$", message = "Color must be a valid hex color (e.g., #FF5733)")
     @Column(length = 7)
     private String color;
 
+    @Size(max = 300, message = "Description cannot exceed 300 characters")
     @Column(length = 300)
     private String description;
 
@@ -38,7 +43,7 @@ public class Category {
         this.description = description;
     }
 
-    // Getters and Setters
+    // Getters and Setters (keep existing ones)
     public Long getId() {
         return id;
     }
@@ -67,7 +72,7 @@ public class Category {
         return description;
     }
 
-    public void setDescription(String id) {
+    public void setDescription(String description) {
         this.description = description;
     }
 
