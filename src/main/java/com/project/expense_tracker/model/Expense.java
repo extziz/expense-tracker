@@ -1,5 +1,6 @@
 package com.project.expense_tracker.model;
 
+import com.project.expense_tracker.exception.ValidExpenseDate;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.*;
 
@@ -17,12 +18,14 @@ public class Expense {
 
     @NotNull(message = "Amount is required")
     @DecimalMin(value = "0.01", message = "Amount must be greater than 0")
+    @DecimalMax(value = "1000000", message = "Amount must be lower than 1 000 000")
     @Digits(integer = 10, fraction = 2, message = "Amount must have at most 2 decimal places")
     @Column(nullable = false, precision = 12, scale = 2)
     private BigDecimal amount;
 
     @NotBlank(message = "Description is required")
     @Size(min = 3, max = 200, message = "Description must be between 3 and 200 characters")
+    @Pattern(regexp = "^[^<>{}]*$", message = "Description cannot contain special characters like <, >, {, }")
     @Column(nullable = false, length = 200)
     private String description;
 
