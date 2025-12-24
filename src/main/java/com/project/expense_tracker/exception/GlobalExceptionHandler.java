@@ -100,6 +100,20 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(error, HttpStatus.BAD_REQUEST);
     }
 
+    // Handle Budget Exceeded Error
+    @ExceptionHandler(BudgetExceededException.class)
+    public ResponseEntity<ErrorResponse>handleBudgetExceeded(
+            BudgetExceededException ex,
+            WebRequest request){
+        ErrorResponse error = new ErrorResponse(
+                HttpStatus.BAD_REQUEST.value(),
+                "VALIDATION_ERROR",
+                ex.getMessage(),
+                request.getDescription(false).replace("uri=", "")
+        );
+                return new ResponseEntity<>(error, HttpStatus.BAD_REQUEST);
+    }
+
     // Handle All Other Exceptions
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ErrorResponse> handleGlobalException(
