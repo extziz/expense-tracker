@@ -1,5 +1,6 @@
 package com.project.expense_tracker.controller;
 
+import com.project.expense_tracker.exception.BudgetExceededException;
 import com.project.expense_tracker.exception.CategoryNotFoundException;
 import com.project.expense_tracker.exception.ExpenseNotFoundException;
 import com.project.expense_tracker.exception.InvalidExpenseException;
@@ -18,6 +19,7 @@ import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/expenses")
@@ -47,16 +49,41 @@ public class ExpenseController {
     // POST - Create new expense
     @PostMapping
     public ResponseEntity<Expense> createExpense(@Valid @RequestBody Expense expense) {
-        // Validate category exists
+        // 1. Validate Category
         if (expense.getCategory() == null || expense.getCategory().getId() == null) {
             throw new InvalidExpenseException("Category is required");
         }
 
-        Category category = categoryRepository.findById(expense.getCategory().getId())
+        // Ensure category exists before doing budget math
+        categoryRepository.findById(expense.getCategory().getId())
                 .orElseThrow(() -> new CategoryNotFoundException(expense.getCategory().getId()));
 
-        expense.setCategory(category);
+        // 2. Calculate current month's total
+        LocalDate now = LocalDate.now();
 
+        // Fetch all
+        List<Expense> thisMonthExpenses = expenseRepository.findAll().stream()
+                .filter(e -> {
+                    LocalDate date = e.getExpenseDate();
+                    // Check Month and Year
+                    return date.getMonth() == now.getMonth() && date.getYear() == now.getYear();
+                })
+                .toList();
+
+        BigDecimal currentTotal = thisMonthExpenses.stream()
+                .map(Expense::getAmount)
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+
+        // 3. Check Budget
+        BigDecimal limit = new BigDecimal("5000");
+        BigDecimal newTotal = currentTotal.add(expense.getAmount());
+
+        // Throw if newTotal > limit
+        if (newTotal.compareTo(limit) >= 0) {
+            throw new BudgetExceededException();
+        }
+
+        // 4. Save
         Expense savedExpense = expenseRepository.save(expense);
         return ResponseEntity.status(HttpStatus.CREATED).body(savedExpense);
     }
