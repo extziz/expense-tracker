@@ -1,165 +1,90 @@
 package com.project.expense_tracker.controller;
 
-import com.project.expense_tracker.exception.BudgetExceededException;
-import com.project.expense_tracker.exception.CategoryNotFoundException;
-import com.project.expense_tracker.exception.ExpenseNotFoundException;
-import com.project.expense_tracker.exception.InvalidExpenseException;
-import com.project.expense_tracker.model.Category;
 import com.project.expense_tracker.model.Expense;
-import com.project.expense_tracker.repository.CategoryRepository;
-import com.project.expense_tracker.repository.ExpenseRepository;
+import com.project.expense_tracker.service.ExpenseService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/expenses")
 @CrossOrigin(origins = "*")
 public class ExpenseController {
 
-    @Autowired
-    private ExpenseRepository expenseRepository;
+    private final ExpenseService expenseService;
 
     @Autowired
-    private CategoryRepository categoryRepository;
-
-    // GET all expenses
-    @GetMapping
-    public List<Expense> getAllExpenses() {
-        return expenseRepository.findAll();
+    public ExpenseController(ExpenseService expenseService) {
+        this.expenseService = expenseService;
     }
 
-    // GET expense by ID
+    @GetMapping
+    public ResponseEntity<List<Expense>> getAllExpenses() {
+        return ResponseEntity.ok(expenseService.getAllExpenses());
+    }
+
     @GetMapping("/{id}")
     public ResponseEntity<Expense> getExpenseById(@PathVariable Long id) {
-        Expense expense = expenseRepository.findById(id)
-                .orElseThrow(() -> new ExpenseNotFoundException(id));
-        return ResponseEntity.ok(expense);
+        return ResponseEntity.ok(expenseService.getExpenseById(id));
     }
 
-    // POST - Create new expense
     @PostMapping
     public ResponseEntity<Expense> createExpense(@Valid @RequestBody Expense expense) {
-        // 1. Validate Category
-        if (expense.getCategory() == null || expense.getCategory().getId() == null) {
-            throw new InvalidExpenseException("Category is required");
-        }
-
-        // Ensure category exists before doing budget math
-        categoryRepository.findById(expense.getCategory().getId())
-                .orElseThrow(() -> new CategoryNotFoundException(expense.getCategory().getId()));
-
-        // 2. Calculate current month's total
-        LocalDate now = LocalDate.now();
-
-        // Fetch all
-        List<Expense> thisMonthExpenses = expenseRepository.findAll().stream()
-                .filter(e -> {
-                    LocalDate date = e.getExpenseDate();
-                    // Check Month and Year
-                    return date.getMonth() == now.getMonth() && date.getYear() == now.getYear();
-                })
-                .toList();
-
-        BigDecimal currentTotal = thisMonthExpenses.stream()
-                .map(Expense::getAmount)
-                .reduce(BigDecimal.ZERO, BigDecimal::add);
-
-        // 3. Check Budget
-        BigDecimal limit = new BigDecimal("5000");
-        BigDecimal newTotal = currentTotal.add(expense.getAmount());
-
-        // Throw if newTotal > limit
-        if (newTotal.compareTo(limit) >= 0) {
-            throw new BudgetExceededException();
-        }
-
-        // 4. Save
-        Expense savedExpense = expenseRepository.save(expense);
-        return ResponseEntity.status(HttpStatus.CREATED).body(savedExpense);
+        Expense created = expenseService.createExpense(expense);
+        return ResponseEntity.status(HttpStatus.CREATED).body(created);
     }
 
-    // PUT - Update expense
     @PutMapping("/{id}")
     public ResponseEntity<Expense> updateExpense(
             @PathVariable Long id,
-            @Valid @RequestBody Expense expenseDetails) {
-
-        Expense expense = expenseRepository.findById(id)
-                .orElseThrow(() -> new ExpenseNotFoundException(id));
-
-        // Validate and set category
-        if (expenseDetails.getCategory() != null && expenseDetails.getCategory().getId() != null) {
-            Category category = categoryRepository.findById(expenseDetails.getCategory().getId())
-                    .orElseThrow(() -> new CategoryNotFoundException(expenseDetails.getCategory().getId()));
-            expense.setCategory(category);
-        }
-
-        expense.setAmount(expenseDetails.getAmount());
-        expense.setDescription(expenseDetails.getDescription());
-        expense.setExpenseDate(expenseDetails.getExpenseDate());
-
-        Expense updatedExpense = expenseRepository.save(expense);
-        return ResponseEntity.ok(updatedExpense);
+            @Valid @RequestBody Expense expense) {
+        Expense updated = expenseService.updateExpense(id, expense);
+        return ResponseEntity.ok(updated);
     }
 
-    // DELETE expense
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteExpense(@PathVariable Long id) {
-        if (!expenseRepository.existsById(id)) {
-            throw new ExpenseNotFoundException(id);
-        }
-        expenseRepository.deleteById(id);
+        expenseService.deleteExpense(id);
         return ResponseEntity.noContent().build();
     }
 
-    // GET expenses by category
     @GetMapping("/category/{categoryId}")
-    public List<Expense> getExpensesByCategory(@PathVariable Long categoryId) {
-        // Verify category exists
-        if (!categoryRepository.existsById(categoryId)) {
-            throw new CategoryNotFoundException(categoryId);
-        }
-        return expenseRepository.findByCategory_Id(categoryId);
+    public ResponseEntity<List<Expense>> getExpensesByCategory(@PathVariable Long categoryId) {
+        return ResponseEntity.ok(expenseService.getExpensesByCategory(categoryId));
     }
 
-    // GET expenses by date range
     @GetMapping("/date-range")
-    public List<Expense> getExpensesByDateRange(
-            @RequestParam LocalDate startDate,
-            @RequestParam LocalDate endDate) {
-
-        if (startDate.isAfter(endDate)) {
-            throw new InvalidExpenseException("Start date must be before end date");
-        }
-
-        return expenseRepository.findByExpenseDateBetween(startDate, endDate);
+    public ResponseEntity<List<Expense>> getExpensesByDateRange(
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate) {
+        return ResponseEntity.ok(expenseService.getExpensesByDateRange(startDate, endDate));
     }
 
-    // GET summary statistics
+    @GetMapping("/search")
+    public ResponseEntity<List<Expense>> searchExpenses(@RequestParam String keyword) {
+        return ResponseEntity.ok(expenseService.searchExpenses(keyword));
+    }
+
     @GetMapping("/summary")
     public ResponseEntity<Map<String, Object>> getSummary() {
-        List<Expense> expenses = expenseRepository.findAll();
+        return ResponseEntity.ok(expenseService.getExpenseSummary());
+    }
 
-        BigDecimal total = expenses.stream()
-                .map(Expense::getAmount)
-                .reduce(BigDecimal.ZERO, BigDecimal::add);
+    @GetMapping("/category/{categoryId}/total")
+    public ResponseEntity<BigDecimal> getTotalByCategory(@PathVariable Long categoryId) {
+        return ResponseEntity.ok(expenseService.getTotalByCategory(categoryId));
+    }
 
-        Map<String, Object> summary = new HashMap<>();
-        summary.put("totalExpenses", expenses.size());
-        summary.put("totalAmount", total);
-        summary.put("averageAmount", expenses.isEmpty() ? BigDecimal.ZERO :
-                total.divide(BigDecimal.valueOf(expenses.size()), 2, BigDecimal.ROUND_HALF_UP));
-
-        return ResponseEntity.ok(summary);
+    @GetMapping("/monthly")
+    public ResponseEntity<Map<String, BigDecimal>> getMonthlyExpenses() {
+        return ResponseEntity.ok(expenseService.getMonthlyExpenses());
     }
 }

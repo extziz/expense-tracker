@@ -1,9 +1,7 @@
 package com.project.expense_tracker.controller;
 
-import com.project.expense_tracker.exception.CategoryNotFoundException;
-import com.project.expense_tracker.exception.DuplicateCategoryException;
 import com.project.expense_tracker.model.Category;
-import com.project.expense_tracker.repository.CategoryRepository;
+import com.project.expense_tracker.service.CategoryService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -17,71 +15,45 @@ import java.util.List;
 @CrossOrigin(origins = "*")
 public class CategoryController {
 
-    @Autowired
-    private CategoryRepository categoryRepository;
+    private final CategoryService categoryService;
 
-    // GET all categories
-    @GetMapping
-    public List<Category> getAllCategories() {
-        return categoryRepository.findAll();
+    @Autowired
+    public CategoryController(CategoryService categoryService) {
+        this.categoryService = categoryService;
     }
 
-    // GET category by ID
+    @GetMapping
+    public ResponseEntity<List<Category>> getAllCategories() {
+        return ResponseEntity.ok(categoryService.getAllCategories());
+    }
+
     @GetMapping("/{id}")
     public ResponseEntity<Category> getCategoryById(@PathVariable Long id) {
-        Category category = categoryRepository.findById(id)
-                .orElseThrow(() -> new CategoryNotFoundException(id));
-        return ResponseEntity.ok(category);
+        return ResponseEntity.ok(categoryService.getCategoryById(id));
     }
 
-    // POST - Create new category
     @PostMapping
     public ResponseEntity<Category> createCategory(@Valid @RequestBody Category category) {
-        // Check if category already exists
-        if (categoryRepository.existsByName(category.getName())) {
-            throw new DuplicateCategoryException(category.getName());
-        }
-
-        Category savedCategory = categoryRepository.save(category);
-        return ResponseEntity.status(HttpStatus.CREATED).body(savedCategory);
+        Category created = categoryService.createCategory(category);
+        return ResponseEntity.status(HttpStatus.CREATED).body(created);
     }
 
-    // PUT - Update category
     @PutMapping("/{id}")
     public ResponseEntity<Category> updateCategory(
             @PathVariable Long id,
-            @Valid @RequestBody Category categoryDetails) {
-
-        Category category = categoryRepository.findById(id)
-                .orElseThrow(() -> new CategoryNotFoundException(id));
-
-        // Check if new name already exists (and it's not the current category)
-        if (!category.getName().equals(categoryDetails.getName()) &&
-                categoryRepository.existsByName(categoryDetails.getName())) {
-            throw new DuplicateCategoryException(categoryDetails.getName());
-        }
-
-        category.setName(categoryDetails.getName());
-        category.setColor(categoryDetails.getColor());
-        category.setDescription(categoryDetails.getDescription());
-
-        Category updatedCategory = categoryRepository.save(category);
-        return ResponseEntity.ok(updatedCategory);
+            @Valid @RequestBody Category category) {
+        Category updated = categoryService.updateCategory(id, category);
+        return ResponseEntity.ok(updated);
     }
 
-    // DELETE category
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteCategory(@PathVariable Long id) {
-        if (!categoryRepository.existsById(id)) {
-            throw new CategoryNotFoundException(id);
-        }
-        categoryRepository.deleteById(id);
+        categoryService.deleteCategory(id);
         return ResponseEntity.noContent().build();
     }
 
-    // GET category by name
     @GetMapping("/search")
-    public List<Category> search(@RequestParam String keyword) {
-        return categoryRepository.findByNameContaining(keyword);
+    public ResponseEntity<List<Category>> searchCategories(@RequestParam String keyword) {
+        return ResponseEntity.ok(categoryService.searchCategories(keyword));
     }
 }
