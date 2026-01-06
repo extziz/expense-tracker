@@ -5,6 +5,7 @@ import com.project.expense_tracker.exception.DuplicateCategoryException;
 import com.project.expense_tracker.model.Category;
 
 import java.util.List;
+import java.util.Map;
 
 public interface CategoryService {
 
@@ -68,4 +69,12 @@ public interface CategoryService {
      * @throws CategoryNotFoundException if not found
      */
     Category getCategoryByName(String name);
+
+    /**
+     * Get category stats by id
+     * @param categoryId  Category id
+     * @return Category statistics if found
+     * @throws CategoryNotFoundException if not found
+     */
+    Map<String, Object> getCategoryStatistics(Long categoryId);
 }
