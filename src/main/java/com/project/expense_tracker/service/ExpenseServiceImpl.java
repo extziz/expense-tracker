@@ -15,10 +15,8 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.time.YearMonth;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 @Service
@@ -50,7 +48,7 @@ public class ExpenseServiceImpl implements ExpenseService {
 
     @Override
     public Expense createExpense(Expense expense) {
-        // Business rule: Validate category exists
+
         if (expense.getCategory() == null || expense.getCategory().getId() == null) {
             throw new InvalidExpenseException("Category is required");
         }
@@ -60,7 +58,6 @@ public class ExpenseServiceImpl implements ExpenseService {
 
         expense.setCategory(category);
 
-        // Business rule: Set expense date to today if not provided
         if (expense.getExpenseDate() == null) {
             expense.setExpenseDate(LocalDate.now());
         }
@@ -179,5 +176,54 @@ public class ExpenseServiceImpl implements ExpenseService {
                         (e1, e2) -> e1,
                         LinkedHashMap::new
                 ));
+    }
+
+    @Override
+    @Transactional
+    public List<Expense> createMultipleExpenses(List<Expense> expenses) {
+
+        if (expenses.isEmpty()) {
+            return Collections.emptyList();
+        }
+
+        Set<Long> categoryIds = expenses.stream()
+                .map(e -> {
+                    if (e.getCategory() == null || e.getCategory().getId() == null) {
+                        throw new InvalidExpenseException("Category ID is required for all expenses");
+                    }
+                    return e.getCategory().getId();
+                })
+                .collect(Collectors.toSet());
+
+        List<Category> categories = categoryRepository.findAllById(categoryIds);
+
+        Map<Long, Category> categoryMap = categories.stream()
+                .collect(Collectors.toMap(Category::getId, Function.identity()));
+
+        for (Expense expense : expenses) {
+            Long catId = expense.getCategory().getId();
+
+            Category category = categoryMap.get(catId);
+            if (category == null) {
+                throw new CategoryNotFoundException(catId);
+            }
+
+            expense.setCategory(category);
+
+            if (expense.getExpenseDate() == null) {
+                expense.setExpenseDate(LocalDate.now());
+            }
+        }
+        return expenseRepository.saveAll(expenses);
+    }
+
+    @Override
+    public void deleteExpensesByCategory(Long categoryId){
+        if (!categoryRepository.existsById(categoryId)) {
+            throw new CategoryNotFoundException(categoryId);
+        }
+        List<Expense> expenses = expenseRepository.findByCategory_Id(categoryId);
+        Set<Long> ids = expenses.stream().map(Expense::getId).collect(Collectors.toSet());
+        expenseRepository.deleteAllById(ids);
     }
 }

@@ -94,4 +94,8 @@ public interface ExpenseService {
      * @return Map with month -> total amount
      */
     Map<String, BigDecimal> getMonthlyExpenses();
+
+    List<Expense> createMultipleExpenses(List<Expense> expenses);
+
+    void deleteExpensesByCategory(Long categoryId);
 }
