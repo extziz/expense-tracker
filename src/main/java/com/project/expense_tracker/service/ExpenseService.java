@@ -98,4 +98,6 @@ public interface ExpenseService {
     List<Expense> createMultipleExpenses(List<Expense> expenses);
 
     void deleteExpensesByCategory(Long categoryId);
+
+    Map<String, BigDecimal> getSpendingByCategory();
 }

@@ -226,4 +226,14 @@ public class ExpenseServiceImpl implements ExpenseService {
         Set<Long> ids = expenses.stream().map(Expense::getId).collect(Collectors.toSet());
         expenseRepository.deleteAllById(ids);
     }
+
+    @Override
+    @Transactional(readOnly = true)
+    public Map<String, BigDecimal> getSpendingByCategory(){
+        List<Category> categoryList = categoryRepository.findAll();
+        Map<String, BigDecimal> summary = categoryList.stream()
+                .collect(Collectors.toMap(
+                        Category::getName, c -> getTotalByCategory(c.getId())));
+        return summary;
+    }
 }
