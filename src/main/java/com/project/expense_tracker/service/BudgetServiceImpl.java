@@ -1,9 +1,9 @@
 package com.project.expense_tracker.service;
 
+import com.project.expense_tracker.exception.BudgetExceededException;
 import com.project.expense_tracker.exception.BudgetNotFoundException;
 import com.project.expense_tracker.exception.CategoryNotFoundException;
 import com.project.expense_tracker.model.Budget;
-import com.project.expense_tracker.model.Category;
 import com.project.expense_tracker.model.Expense;
 import com.project.expense_tracker.repository.BudgetRepository;
 import com.project.expense_tracker.repository.CategoryRepository;
@@ -14,8 +14,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.time.YearMonth;
-import java.util.Optional;
-import java.util.stream.Collectors;
 
 @Service
 @Transactional
@@ -34,13 +32,22 @@ public class BudgetServiceImpl implements BudgetService {
 
     @Override
     public Budget setBudget(Long categoryId, YearMonth month, BigDecimal limit){
-        Budget budget = new Budget(categoryId, limit, month);
+        if (!categoryRepository.existsById(categoryId)) {
+            throw new CategoryNotFoundException(categoryId);
+        }
+
+        Budget budget = budgetRepository.findByCategoryIdAndMonth(categoryId, month)
+                .orElse(new Budget(categoryId, limit, month));
+
+        budget.setMonthlyLimit(limit);
+
         return budgetRepository.save(budget);
     }
 
     @Override
+    @Transactional(readOnly = true)
     public boolean isBudgetExceeded(Long categoryId, YearMonth month){
-        Category category = categoryRepository.findById(categoryId)
+        categoryRepository.findById(categoryId)
                 .orElseThrow(() -> new CategoryNotFoundException(categoryId));
         Budget budget = budgetRepository.findByCategoryIdAndMonth(categoryId, month)
                 .orElseThrow(() -> new BudgetNotFoundException("There is no budget at " + month.toString()));
@@ -49,5 +56,23 @@ public class BudgetServiceImpl implements BudgetService {
                 .map(Expense::getAmount)
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
         return totalSpent.compareTo(budget.getMonthlyLimit()) > 0;
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public BigDecimal getRemainingBudget(Long categoryId, YearMonth month){
+        if(isBudgetExceeded(categoryId, month)){
+            throw new BudgetExceededException();
+        }
+        categoryRepository.findById(categoryId)
+                .orElseThrow(() -> new CategoryNotFoundException(categoryId));
+        Budget budget = budgetRepository.findByCategoryIdAndMonth(categoryId, month)
+                .orElseThrow(() -> new BudgetNotFoundException("There is no budget at " + month.toString()));
+        BigDecimal totalSpent = expenseRepository.findByCategory_Id(categoryId).stream()
+                .filter(e -> YearMonth.from(e.getExpenseDate()).equals(month))
+                .map(Expense::getAmount)
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+
+        return budget.getMonthlyLimit().subtract(totalSpent);
     }
 }
