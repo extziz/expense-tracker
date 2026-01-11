@@ -10,6 +10,7 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
 
+
 public interface ExpenseService {
 
     /**
@@ -100,4 +101,6 @@ public interface ExpenseService {
     void deleteExpensesByCategory(Long categoryId);
 
     Map<String, BigDecimal> getSpendingByCategory();
+
+    void createExpenseWithIntentionalError();
 }

@@ -236,4 +236,19 @@ public class ExpenseServiceImpl implements ExpenseService {
                         Category::getName, c -> getTotalByCategory(c.getId())));
         return summary;
     }
+
+    @Override
+    @Transactional
+    public void createExpenseWithIntentionalError() {
+
+        Expense expense = new Expense();
+        expense.setAmount(new BigDecimal("100.00"));
+        expense.setExpenseDate(LocalDate.now());
+
+        expenseRepository.save(expense);
+
+
+        throw new RuntimeException("Simulated Error for Testing");
+    }
 }
+
