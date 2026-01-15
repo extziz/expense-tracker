@@ -93,15 +93,6 @@ public interface ExpenseRepository extends JpaRepository<Expense, Long> {
             "(SELECT AVG(e2.amount) FROM Expense e2)")
     List<Expense> findExpensesAboveAverage();
 
-    // Monthly summary
-    @Query("SELECT FUNCTION('YEAR', e.expenseDate) as year, " +
-            "FUNCTION('MONTH', e.expenseDate) as month, " +
-            "SUM(e.amount) as total " +
-            "FROM Expense e " +
-            "GROUP BY FUNCTION('YEAR', e.expenseDate), FUNCTION('MONTH', e.expenseDate) " +
-            "ORDER BY year DESC, month DESC")
-    List<Object[]> getMonthlySummary();
-
     // Category breakdown
     @Query("SELECT e.category.name, COUNT(e), SUM(e.amount), AVG(e.amount) " +
             "FROM Expense e " +
@@ -129,6 +120,16 @@ public interface ExpenseRepository extends JpaRepository<Expense, Long> {
     List<Object[]> getTopSpendingCategories();
 
     // ========== Native SQL Queries ==========
+
+    // Monthly summary
+    @Query(value = "SELECT YEAR(e.expense_date) as year, " +
+            "MONTH(e.expense_date) as month, " +
+            "SUM(e.amount) as total " +
+            "FROM expense e " +
+            "GROUP BY year, month " + // SQL often allows aliases here
+            "ORDER BY year DESC, month DESC",
+            nativeQuery = true)
+    List<Object[]> getMonthlySummary();
 
     // Complex aggregation with native SQL
     @Query(value = "SELECT " +
