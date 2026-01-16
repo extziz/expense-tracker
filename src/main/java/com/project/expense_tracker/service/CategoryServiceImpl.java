@@ -15,6 +15,7 @@ import java.math.RoundingMode;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @Service
 @Transactional
@@ -140,5 +141,38 @@ public class CategoryServiceImpl implements CategoryService {
         summary.put("Highest expense", maxExpense);
         summary.put("Lowest expense", minExpense);
         return summary;
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<Category> getCategoriesOrderedByName() {
+        return categoryRepository.findAllByOrderByNameAsc();
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<Category> getCategoriesWithMinExpenses(int minCount) {
+        return categoryRepository.findCategoriesWithMinimumExpenses(minCount);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<Category> getUnusedCategories() {
+        return categoryRepository.findCategoriesWithoutExpenses();
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<Map<String, Object>> getCategoryStatistics() {
+        List<Object[]> results = categoryRepository.getCategoryStatistics();
+
+        return results.stream().map(row -> {
+            Map<String, Object> stat = new HashMap<>();
+            stat.put("id", row[0]);
+            stat.put("name", row[1]);
+            stat.put("expenseCount", row[2]);
+            stat.put("totalAmount", row[3]);
+            return stat;
+        }).collect(Collectors.toList());
     }
 }

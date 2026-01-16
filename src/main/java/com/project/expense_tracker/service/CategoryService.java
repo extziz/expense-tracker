@@ -77,4 +77,24 @@ public interface CategoryService {
      * @throws CategoryNotFoundException if not found
      */
     Map<String, Object> getCategoryStatistics(Long categoryId);
+
+    /**
+     * Get categories ordered by name
+     */
+    List<Category> getCategoriesOrderedByName();
+
+    /**
+     * Get categories with at least N expenses
+     */
+    List<Category> getCategoriesWithMinExpenses(int minCount);
+
+    /**
+     * Get categories without any expenses
+     */
+    List<Category> getUnusedCategories();
+
+    /**
+     * Get category statistics
+     */
+    List<Map<String, Object>> getCategoryStatistics();
 }
