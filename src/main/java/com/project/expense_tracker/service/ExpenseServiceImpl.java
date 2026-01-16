@@ -250,5 +250,80 @@ public class ExpenseServiceImpl implements ExpenseService {
 
         throw new RuntimeException("Simulated Error for Testing");
     }
+
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<Expense> getTopExpenses(int limit) {
+        List<Expense> allExpenses = expenseRepository.findTop10ByOrderByAmountDesc();
+        return allExpenses.stream()
+                .limit(limit)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<Expense> getExpensesAboveAverage() {
+        return expenseRepository.findExpensesAboveAverage();
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<Expense> getCurrentMonthExpenses() {
+        return expenseRepository.findCurrentMonthExpenses();
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<Map<String, Object>> getDetailedStatsByDateRange(
+            LocalDate startDate, LocalDate endDate) {
+
+        List<Object[]> results = expenseRepository.getDetailedCategoryStats(startDate, endDate);
+
+        return results.stream().map(row -> {
+            Map<String, Object> stat = new HashMap<>();
+            stat.put("category", row[0]);
+            stat.put("count", row[1]);
+            stat.put("total", row[2]);
+            stat.put("average", row[3]);
+            stat.put("minimum", row[4]);
+            stat.put("maximum", row[5]);
+            return stat;
+        }).collect(Collectors.toList());
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<Map<String, Object>> getDailySpendingTrend() {
+        List<Object[]> results = expenseRepository.getDailySpendingLast30Days();
+
+        return results.stream().map(row -> {
+            Map<String, Object> day = new HashMap<>();
+            day.put("date", row[0]);
+            day.put("total", row[1]);
+            return day;
+        }).collect(Collectors.toList());
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<Expense> searchAll(String keyword) {
+        return expenseRepository.searchByKeyword(keyword);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<Map<String, Object>> getCategoryBreakdown() {
+        List<Object[]> results = expenseRepository.getCategoryBreakdown();
+
+        return results.stream().map(row -> {
+            Map<String, Object> breakdown = new HashMap<>();
+            breakdown.put("category", row[0]);
+            breakdown.put("count", row[1]);
+            breakdown.put("total", row[2]);
+            breakdown.put("average", row[3]);
+            return breakdown;
+        }).collect(Collectors.toList());
+    }
 }
 

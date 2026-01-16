@@ -96,6 +96,43 @@ public interface ExpenseService {
      */
     Map<String, BigDecimal> getMonthlyExpenses();
 
+    // Add to existing ExpenseService interface
+
+    /**
+     * Get top N most expensive expenses
+     */
+    List<Expense> getTopExpenses(int limit);
+
+    /**
+     * Get expenses above average amount
+     */
+    List<Expense> getExpensesAboveAverage();
+
+    /**
+     * Get current month's expenses
+     */
+    List<Expense> getCurrentMonthExpenses();
+
+    /**
+     * Get detailed statistics for a date range
+     */
+    List<Map<String, Object>> getDetailedStatsByDateRange(LocalDate startDate, LocalDate endDate);
+
+    /**
+     * Get daily spending for last 30 days
+     */
+    List<Map<String, Object>> getDailySpendingTrend();
+
+    /**
+     * Search across description and category
+     */
+    List<Expense> searchAll(String keyword);
+
+    /**
+     * Get category breakdown with statistics
+     */
+    List<Map<String, Object>> getCategoryBreakdown();
+
     List<Expense> createMultipleExpenses(List<Expense> expenses);
 
     void deleteExpensesByCategory(Long categoryId);
