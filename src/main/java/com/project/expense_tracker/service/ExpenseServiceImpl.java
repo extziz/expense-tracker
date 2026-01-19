@@ -325,5 +325,11 @@ public class ExpenseServiceImpl implements ExpenseService {
             return breakdown;
         }).collect(Collectors.toList());
     }
+
+    @Override
+    public List<Expense> getRecentExpenses(int days){
+        LocalDate cutoffDate = LocalDate.now().minusDays(days);
+        return expenseRepository.findByExpenseDateAfter(cutoffDate);
+    }
 }
 

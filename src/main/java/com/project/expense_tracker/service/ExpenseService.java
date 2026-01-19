@@ -140,4 +140,6 @@ public interface ExpenseService {
     Map<String, BigDecimal> getSpendingByCategory();
 
     void createExpenseWithIntentionalError();
+
+    List<Expense> getRecentExpenses(int days);
 }
