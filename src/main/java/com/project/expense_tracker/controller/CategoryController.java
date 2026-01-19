@@ -9,6 +9,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/categories")
@@ -55,5 +56,26 @@ public class CategoryController {
     @GetMapping("/search")
     public ResponseEntity<List<Category>> searchCategories(@RequestParam String keyword) {
         return ResponseEntity.ok(categoryService.searchCategories(keyword));
+    }
+
+    @GetMapping("/ordered")
+    public ResponseEntity<List<Category>> getCategoriesOrdered() {
+        return ResponseEntity.ok(categoryService.getCategoriesOrderedByName());
+    }
+
+    @GetMapping("/with-expenses")
+    public ResponseEntity<List<Category>> getCategoriesWithMinExpenses(
+            @RequestParam(defaultValue = "1") int minCount) {
+        return ResponseEntity.ok(categoryService.getCategoriesWithMinExpenses(minCount));
+    }
+
+    @GetMapping("/unused")
+    public ResponseEntity<List<Category>> getUnusedCategories() {
+        return ResponseEntity.ok(categoryService.getUnusedCategories());
+    }
+
+    @GetMapping("/statistics")
+    public ResponseEntity<List<Map<String, Object>>> getCategoryStatistics() {
+        return ResponseEntity.ok(categoryService.getCategoryStatistics());
     }
 }
