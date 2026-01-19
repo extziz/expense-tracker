@@ -119,6 +119,17 @@ public interface ExpenseRepository extends JpaRepository<Expense, Long> {
             "ORDER BY SUM(e.amount) DESC")
     List<Object[]> getTopSpendingCategories();
 
+    @Query("SELECT CASE WHEN SUM(e.amount) >:budget THEN true ELSE false END " +
+            "FROM Expense e " +
+            "WHERE e.category.id = :categoryId " +
+            "AND e.expenseDate BETWEEN :startDate AND :endDate" )
+    boolean isBudgetExceeded(
+            @Param("categoryId") Long categoryId,
+            @Param("budget") BigDecimal budget,
+            @Param("startDate") LocalDate startDate,
+            @Param("endDate") LocalDate endDate
+    );
+
     // ========== Native SQL Queries ==========
 
     // Monthly summary
