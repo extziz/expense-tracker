@@ -9,6 +9,7 @@ import org.springframework.stereotype.Repository;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Map;
 
 @Repository
 public interface ExpenseRepository extends JpaRepository<Expense, Long> {
@@ -184,4 +185,22 @@ public interface ExpenseRepository extends JpaRepository<Expense, Long> {
             @Param("year1") int year1,
             @Param("year2") int year2
     );
+
+    @Query(value = "SELECT " +
+            "curr.total AS current_total, " +
+            "prev.total AS previous_total, " +
+            "CASE " +
+            "WHEN prev.total = 0 THEN 0 " +
+            "ELSE ROUND(((curr.total - prev.total) / prev.total) * 100, 2) " +
+            "END AS growth_percent " +
+            "FROM expense" +
+            "(SELECT COALESCE(SUM(amount), 0) AS total " +
+            "FROM expense " +
+            "WHERE YEAR(expense_date) = :year AND MONTH(expense_date) = :month) AS curr, " +
+            "(SELECT COALESCE(SUM(amount), 0) AS total " +
+            "FROM expense " +
+            "WHERE (MONTH(expense_date) = :month - 1 AND YEAR(expense_date) = :year) " +
+            "OR (:month = 1 AND MONTH(expense_date) = 12 AND YEAR(expense_date) = :year - 1)) AS prev"
+            , nativeQuery = true)
+    Map<String, Object> getMonthlyGrowth(@Param("year") int year,@Param("month") int month);
 }
