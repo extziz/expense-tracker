@@ -96,8 +96,6 @@ public interface ExpenseService {
      */
     Map<String, BigDecimal> getMonthlyExpenses();
 
-    // Add to existing ExpenseService interface
-
     /**
      * Get top N most expensive expenses
      */
@@ -142,4 +140,9 @@ public interface ExpenseService {
     void createExpenseWithIntentionalError();
 
     List<Expense> getRecentExpenses(int days);
+
+    List<Expense> getThisWeekExpenses();
+    List<Expense> getLastWeekExpenses();
+    List<Expense> getThisYearExpenses();
+    List<Expense> getLastYearExpenses();
 }

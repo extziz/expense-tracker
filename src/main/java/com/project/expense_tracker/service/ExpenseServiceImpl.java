@@ -13,8 +13,11 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.YearMonth;
+import java.time.temporal.TemporalAdjuster;
+import java.time.temporal.TemporalAdjusters;
 import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -330,6 +333,38 @@ public class ExpenseServiceImpl implements ExpenseService {
     public List<Expense> getRecentExpenses(int days){
         LocalDate cutoffDate = LocalDate.now().minusDays(days);
         return expenseRepository.findByExpenseDateAfter(cutoffDate);
+    }
+
+    @Override
+    public List<Expense> getThisWeekExpenses(){
+        LocalDate today = LocalDate.now();
+        LocalDate startOfWeek = today.with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY));
+        LocalDate endOfWeek = today.with(TemporalAdjusters.nextOrSame(DayOfWeek.SATURDAY));
+        return expenseRepository.findByExpenseDateBetween(startOfWeek, endOfWeek);
+    }
+
+    @Override
+    public List<Expense> getLastWeekExpenses(){
+        LocalDate today = LocalDate.now();
+        LocalDate startOfLastWeek = today.minusWeeks(1).with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY));
+        LocalDate endOfLastWeek = today.minusWeeks(1).with(TemporalAdjusters.nextOrSame(DayOfWeek.SATURDAY));
+        return expenseRepository.findByExpenseDateBetween(startOfLastWeek, endOfLastWeek);
+    }
+
+    @Override
+    public List<Expense> getThisYearExpenses(){
+        LocalDate today = LocalDate.now();
+        LocalDate startOfYear = today.with(TemporalAdjusters.firstDayOfYear());
+        LocalDate endOfYear = today.with(TemporalAdjusters.lastDayOfYear());
+        return expenseRepository.findByExpenseDateBetween(startOfYear, endOfYear);
+    }
+
+    @Override
+    public List<Expense> getLastYearExpenses(){
+        LocalDate today = LocalDate.now();
+        LocalDate startOfLastYear = today.minusYears (1).with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY));
+        LocalDate endOfLastYear = today.minusYears(1).with(TemporalAdjusters.nextOrSame(DayOfWeek.SATURDAY));
+        return expenseRepository.findByExpenseDateBetween(startOfLastYear, endOfLastYear);
     }
 }
 
