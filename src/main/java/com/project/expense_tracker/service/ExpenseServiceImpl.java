@@ -8,6 +8,7 @@ import com.project.expense_tracker.model.Expense;
 import com.project.expense_tracker.repository.CategoryRepository;
 import com.project.expense_tracker.repository.ExpenseRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -365,6 +366,22 @@ public class ExpenseServiceImpl implements ExpenseService {
         LocalDate startOfLastYear = today.minusYears (1).with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY));
         LocalDate endOfLastYear = today.minusYears(1).with(TemporalAdjusters.nextOrSame(DayOfWeek.SATURDAY));
         return expenseRepository.findByExpenseDateBetween(startOfLastYear, endOfLastYear);
+    }
+
+    @Override
+    public List<Expense> filterExpenses(Long categoryId, BigDecimal minAmount /*...*/) {
+
+        Specification<Expense> spec = (root, query, cb) -> cb.conjunction();
+
+        if (categoryId != null) {
+            spec = spec.and(ExpenseSpecifications.hasCategory(categoryId));
+        }
+
+        if (minAmount != null) {
+            spec = spec.and(ExpenseSpecifications.priceGreaterThan(minAmount));
+        }
+
+        return expenseRepository.findAll(spec);
     }
 }
 
