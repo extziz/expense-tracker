@@ -369,7 +369,7 @@ public class ExpenseServiceImpl implements ExpenseService {
     }
 
     @Override
-    public List<Expense> filterExpenses(Long categoryId, BigDecimal minAmount /*...*/) {
+    public List<Expense> filterExpenses(Long categoryId, BigDecimal minAmount, BigDecimal maxAmount, LocalDate startDate, LocalDate endDate, String keyword) {
 
         Specification<Expense> spec = (root, query, cb) -> cb.conjunction();
 
@@ -379,6 +379,22 @@ public class ExpenseServiceImpl implements ExpenseService {
 
         if (minAmount != null) {
             spec = spec.and(ExpenseSpecifications.priceGreaterThan(minAmount));
+        }
+
+        if (maxAmount != null) {
+            spec = spec.and(ExpenseSpecifications.priceLessThan(maxAmount));
+        }
+
+        if (startDate != null) {
+            spec = spec.and(ExpenseSpecifications.dateAfterThe(startDate));
+        }
+
+        if (endDate != null) {
+            spec = spec.and(ExpenseSpecifications.dateBeforeThe(endDate));
+        }
+
+        if (keyword != null) {
+            spec = spec.and(ExpenseSpecifications.containsKeyword(keyword));
         }
 
         return expenseRepository.findAll(spec);

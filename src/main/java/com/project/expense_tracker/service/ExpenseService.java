@@ -145,5 +145,5 @@ public interface ExpenseService {
     List<Expense> getLastWeekExpenses();
     List<Expense> getThisYearExpenses();
     List<Expense> getLastYearExpenses();
-    List<Expense> filterExpenses(Long categoryId, BigDecimal minAmount /*...*/);
+    List<Expense> filterExpenses(Long categoryId, BigDecimal minAmount, BigDecimal maxAmount, LocalDate startDate, LocalDate endDate, String keyword);
 }
