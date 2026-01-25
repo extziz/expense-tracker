@@ -16,8 +16,8 @@ A full-stack web application for tracking and managing personal expenses. Built 
 ## 🛠️ Tech Stack
 
 **Backend:**
-- Java 17
-- Spring Boot 3.2.0
+- Java 21
+- Spring Boot 4.0.0
 - Spring Data JPA
 - H2 Database (development)
 - PostgreSQL/MySQL ready (production)
