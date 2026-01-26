@@ -1,79 +1,82 @@
 package com.project.expense_tracker.service;
 
+import com.project.expense_tracker.dto.*;
 import com.project.expense_tracker.exception.CategoryNotFoundException;
 import com.project.expense_tracker.exception.DuplicateCategoryException;
+import com.project.expense_tracker.mapper.CategoryMapper;
 import com.project.expense_tracker.model.Category;
-import com.project.expense_tracker.model.Expense;
 import com.project.expense_tracker.repository.CategoryRepository;
-import com.project.expense_tracker.repository.ExpenseRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.math.BigDecimal;
-import java.math.RoundingMode;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
 
 @Service
 @Transactional
 public class CategoryServiceImpl implements CategoryService {
 
-    private final ExpenseRepository expenseRepository;
     private final CategoryRepository categoryRepository;
+    private final CategoryMapper categoryMapper;
 
     @Autowired
-    public CategoryServiceImpl(ExpenseRepository expenseRepository,
-                              CategoryRepository categoryRepository) {
-        this.expenseRepository = expenseRepository;
+    public CategoryServiceImpl(CategoryRepository categoryRepository, CategoryMapper categoryMapper) {
         this.categoryRepository = categoryRepository;
+        this.categoryMapper = categoryMapper;
     }
 
     @Override
     @Transactional(readOnly = true)
-    public List<Category> getAllCategories() {
-        return categoryRepository.findAll();
+    public List<CategorySummaryResponse> getAllCategories() {
+        List<Category> categories = categoryRepository.findAll();
+        return categoryMapper.toSummaryList(categories);
     }
 
     @Override
     @Transactional(readOnly = true)
-    public Category getCategoryById(Long id) {
-        return categoryRepository.findById(id)
+    public CategoryResponse getCategoryById(Long id) {
+        Category category = categoryRepository.findById(id)
                 .orElseThrow(() -> new CategoryNotFoundException(id));
+        return categoryMapper.toResponse(category);
     }
 
     @Override
-    public Category createCategory(Category category) {
-
-        if (categoryRepository.existsByName(category.getName())) {
-            throw new DuplicateCategoryException(category.getName());
+    public CategoryResponse createCategory(CreateCategoryRequest request) {
+        // Business rule: Check for duplicate names
+        if (categoryRepository.existsByName(request.getName())) {
+            throw new DuplicateCategoryException(request.getName());
         }
 
+        // Convert DTO to Entity
+        Category category = categoryMapper.toEntity(request);
+
+        // Business rule: Set default color if not provided
         if (category.getColor() == null || category.getColor().isEmpty()) {
-            category.setColor("#808080"); // Default gray
+            category.setColor("#808080");
         }
 
-        return categoryRepository.save(category);
+        // Save and return DTO
+        Category saved = categoryRepository.save(category);
+        return categoryMapper.toResponse(saved);
     }
 
     @Override
-    public Category updateCategory(Long id, Category categoryDetails) {
-        Category existingCategory = getCategoryById(id);
+    public CategoryResponse updateCategory(Long id, UpdateCategoryRequest request) {
+        Category existingCategory = categoryRepository.findById(id)
+                .orElseThrow(() -> new CategoryNotFoundException(id));
 
         // Business rule: Check if new name conflicts with another category
-        if (!existingCategory.getName().equals(categoryDetails.getName()) &&
-                categoryRepository.existsByName(categoryDetails.getName())) {
-            throw new DuplicateCategoryException(categoryDetails.getName());
+        if (request.getName() != null &&
+                !existingCategory.getName().equals(request.getName()) &&
+                categoryRepository.existsByName(request.getName())) {
+            throw new DuplicateCategoryException(request.getName());
         }
 
-        // Update fields
-        existingCategory.setName(categoryDetails.getName());
-        existingCategory.setColor(categoryDetails.getColor());
-        existingCategory.setDescription(categoryDetails.getDescription());
+        // Update only provided fields
+        categoryMapper.updateEntityFromRequest(request, existingCategory);
 
-        return categoryRepository.save(existingCategory);
+        Category updated = categoryRepository.save(existingCategory);
+        return categoryMapper.toResponse(updated);
     }
 
     @Override
@@ -86,8 +89,9 @@ public class CategoryServiceImpl implements CategoryService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<Category> searchCategories(String keyword) {
-        return categoryRepository.findByNameContaining(keyword);
+    public List<CategorySummaryResponse> searchCategories(String keyword) {
+        List<Category> categories = categoryRepository.findByNameContainingIgnoreCase(keyword);
+        return categoryMapper.toSummaryList(categories);
     }
 
     @Override
@@ -98,81 +102,23 @@ public class CategoryServiceImpl implements CategoryService {
 
     @Override
     @Transactional(readOnly = true)
-    public Category getCategoryByName(String name) {
-        return categoryRepository.findByName(name)
+    public CategoryResponse getCategoryByName(String name) {
+        Category category = categoryRepository.findByName(name)
                 .orElseThrow(() -> new CategoryNotFoundException(name));
+        return categoryMapper.toResponse(category);
     }
 
     @Override
     @Transactional(readOnly = true)
-    public Map<String, Object> getCategoryStatistics(Long categoryId){
-        if (!categoryRepository.existsById(categoryId)) {
-            throw new CategoryNotFoundException(categoryId);
-        }
-        List<Expense> expenses = expenseRepository.findByCategory_Id(categoryId);
-
-        if (expenses.isEmpty()) {
-            Map<String, Object> emptySummary = new HashMap<>();
-            emptySummary.put("Total expenses in category", BigDecimal.ZERO);
-            emptySummary.put("Average expense amount", BigDecimal.ZERO);
-            emptySummary.put("Number of expenses", 0);
-            emptySummary.put("Highest expense", BigDecimal.ZERO);
-            emptySummary.put("Lowest expense", BigDecimal.ZERO);
-            return emptySummary;
-        }
-
-        List<BigDecimal> expenseAmounts = expenses.stream()
-                .map(Expense::getAmount)
-                .toList();
-        BigDecimal total = expenseAmounts.stream()
-                .reduce(BigDecimal.ZERO, BigDecimal::add);
-        int numberOfExpenses = expenseAmounts.size();
-        BigDecimal average = total.divide(BigDecimal.valueOf(numberOfExpenses), 2, RoundingMode.HALF_UP);
-        BigDecimal maxExpense = expenseAmounts.stream()
-                .max(BigDecimal::compareTo)
-                .orElse(BigDecimal.ZERO);
-        BigDecimal minExpense = expenseAmounts.stream()
-                .min(BigDecimal::compareTo)
-                .orElse(BigDecimal.ZERO);
-        Map<String, Object> summary = new HashMap<>();
-        summary.put("Total expenses in category", total);
-        summary.put("Average expense amount", average);
-        summary.put("Number of expenses", numberOfExpenses);
-        summary.put("Highest expense", maxExpense);
-        summary.put("Lowest expense", minExpense);
-        return summary;
+    public List<CategorySummaryResponse> getCategoriesOrderedByName() {
+        List<Category> categories = categoryRepository.findAllByOrderByNameAsc();
+        return categoryMapper.toSummaryList(categories);
     }
 
     @Override
     @Transactional(readOnly = true)
-    public List<Category> getCategoriesOrderedByName() {
-        return categoryRepository.findAllByOrderByNameAsc();
-    }
-
-    @Override
-    @Transactional(readOnly = true)
-    public List<Category> getCategoriesWithMinExpenses(int minCount) {
-        return categoryRepository.findCategoriesWithMinimumExpenses(minCount);
-    }
-
-    @Override
-    @Transactional(readOnly = true)
-    public List<Category> getUnusedCategories() {
-        return categoryRepository.findCategoriesWithoutExpenses();
-    }
-
-    @Override
-    @Transactional(readOnly = true)
-    public List<Map<String, Object>> getCategoryStatistics() {
-        List<Object[]> results = categoryRepository.getCategoryStatistics();
-
-        return results.stream().map(row -> {
-            Map<String, Object> stat = new HashMap<>();
-            stat.put("id", row[0]);
-            stat.put("name", row[1]);
-            stat.put("expenseCount", row[2]);
-            stat.put("totalAmount", row[3]);
-            return stat;
-        }).collect(Collectors.toList());
+    public List<CategoryResponse> getUnusedCategories() {
+        List<Category> categories = categoryRepository.findCategoriesWithoutExpenses();
+        return categoryMapper.toResponseList(categories);
     }
 }

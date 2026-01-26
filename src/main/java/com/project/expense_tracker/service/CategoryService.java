@@ -1,100 +1,28 @@
 package com.project.expense_tracker.service;
 
-import com.project.expense_tracker.exception.CategoryNotFoundException;
-import com.project.expense_tracker.exception.DuplicateCategoryException;
-import com.project.expense_tracker.model.Category;
+import com.project.expense_tracker.dto.*;
 
 import java.util.List;
-import java.util.Map;
 
 public interface CategoryService {
 
-    /**
-     * Get all categories
-     * @return List of all categories
-     */
-    List<Category> getAllCategories();
+    List<CategorySummaryResponse> getAllCategories();
 
-    /**
-     * Get category by ID
-     * @param id Category ID
-     * @return Category if found
-     * @throws CategoryNotFoundException if not found
-     */
-    Category getCategoryById(Long id);
+    CategoryResponse getCategoryById(Long id);
 
-    /**
-     * Create a new category
-     * @param category Category to create
-     * @return Created category with ID
-     * @throws DuplicateCategoryException if name already exists
-     */
-    Category createCategory(Category category);
+    CategoryResponse createCategory(CreateCategoryRequest request);
 
-    /**
-     * Update an existing category
-     * @param id Category ID
-     * @param category Updated category data
-     * @return Updated category
-     * @throws CategoryNotFoundException if not found
-     * @throws DuplicateCategoryException if new name already exists
-     */
-    Category updateCategory(Long id, Category category);
+    CategoryResponse updateCategory(Long id, UpdateCategoryRequest request);
 
-    /**
-     * Delete a category
-     * @param id Category ID
-     * @throws CategoryNotFoundException if not found
-     */
     void deleteCategory(Long id);
 
-    /**
-     * Search categories by keyword
-     * @param keyword Search keyword
-     * @return List of matching categories
-     */
-    List<Category> searchCategories(String keyword);
+    List<CategorySummaryResponse> searchCategories(String keyword);
 
-    /**
-     * Check if category exists by name
-     * @param name Category name
-     * @return true if exists
-     */
     boolean existsByName(String name);
 
-    /**
-     * Get category by name
-     * @param name Category name
-     * @return Category if found
-     * @throws CategoryNotFoundException if not found
-     */
-    Category getCategoryByName(String name);
+    CategoryResponse getCategoryByName(String name);
 
-    /**
-     * Get category stats by id
-     * @param categoryId  Category id
-     * @return Category statistics if found
-     * @throws CategoryNotFoundException if not found
-     */
-    Map<String, Object> getCategoryStatistics(Long categoryId);
+    List<CategorySummaryResponse> getCategoriesOrderedByName();
 
-    /**
-     * Get categories ordered by name
-     */
-    List<Category> getCategoriesOrderedByName();
-
-    /**
-     * Get categories with at least N expenses
-     */
-    List<Category> getCategoriesWithMinExpenses(int minCount);
-
-    /**
-     * Get categories without any expenses
-     */
-    List<Category> getUnusedCategories();
-
-    /**
-     * Get category statistics
-     */
-    List<Map<String, Object>> getCategoryStatistics();
+    List<CategoryResponse> getUnusedCategories();
 }
