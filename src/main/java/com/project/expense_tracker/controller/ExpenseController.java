@@ -3,7 +3,6 @@ package com.project.expense_tracker.controller;
 import com.project.expense_tracker.dto.CreateExpenseRequest;
 import com.project.expense_tracker.dto.ExpenseResponse;
 import com.project.expense_tracker.dto.UpdateExpenseRequest;
-import com.project.expense_tracker.model.Expense;
 import com.project.expense_tracker.service.ExpenseService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
