@@ -1,6 +1,6 @@
 package com.project.expense_tracker.controller;
 
-import com.project.expense_tracker.model.Category;
+import com.project.expense_tracker.dto.*;
 import com.project.expense_tracker.service.CategoryService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -9,7 +9,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.Map;
 
 @RestController
 @RequestMapping("/api/categories")
@@ -24,26 +23,27 @@ public class CategoryController {
     }
 
     @GetMapping
-    public ResponseEntity<List<Category>> getAllCategories() {
+    public ResponseEntity<List<CategorySummaryResponse>> getAllCategories() {
         return ResponseEntity.ok(categoryService.getAllCategories());
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Category> getCategoryById(@PathVariable Long id) {
+    public ResponseEntity<CategoryResponse> getCategoryById(@PathVariable Long id) {
         return ResponseEntity.ok(categoryService.getCategoryById(id));
     }
 
     @PostMapping
-    public ResponseEntity<Category> createCategory(@Valid @RequestBody Category category) {
-        Category created = categoryService.createCategory(category);
+    public ResponseEntity<CategoryResponse> createCategory(
+            @Valid @RequestBody CreateCategoryRequest request) {
+        CategoryResponse created = categoryService.createCategory(request);
         return ResponseEntity.status(HttpStatus.CREATED).body(created);
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Category> updateCategory(
+    public ResponseEntity<CategoryResponse> updateCategory(
             @PathVariable Long id,
-            @Valid @RequestBody Category category) {
-        Category updated = categoryService.updateCategory(id, category);
+            @Valid @RequestBody UpdateCategoryRequest request) {
+        CategoryResponse updated = categoryService.updateCategory(id, request);
         return ResponseEntity.ok(updated);
     }
 
@@ -54,28 +54,18 @@ public class CategoryController {
     }
 
     @GetMapping("/search")
-    public ResponseEntity<List<Category>> searchCategories(@RequestParam String keyword) {
+    public ResponseEntity<List<CategorySummaryResponse>> searchCategories(
+            @RequestParam String keyword) {
         return ResponseEntity.ok(categoryService.searchCategories(keyword));
     }
 
     @GetMapping("/ordered")
-    public ResponseEntity<List<Category>> getCategoriesOrdered() {
+    public ResponseEntity<List<CategorySummaryResponse>> getCategoriesOrdered() {
         return ResponseEntity.ok(categoryService.getCategoriesOrderedByName());
     }
 
-    @GetMapping("/with-expenses")
-    public ResponseEntity<List<Category>> getCategoriesWithMinExpenses(
-            @RequestParam(defaultValue = "1") int minCount) {
-        return ResponseEntity.ok(categoryService.getCategoriesWithMinExpenses(minCount));
-    }
-
     @GetMapping("/unused")
-    public ResponseEntity<List<Category>> getUnusedCategories() {
+    public ResponseEntity<List<CategoryResponse>> getUnusedCategories() {
         return ResponseEntity.ok(categoryService.getUnusedCategories());
-    }
-
-    @GetMapping("/statistics")
-    public ResponseEntity<List<Map<String, Object>>> getCategoryStatistics() {
-        return ResponseEntity.ok(categoryService.getCategoryStatistics());
     }
 }

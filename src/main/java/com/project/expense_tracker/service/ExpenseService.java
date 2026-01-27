@@ -1,9 +1,8 @@
 package com.project.expense_tracker.service;
 
-import com.project.expense_tracker.exception.CategoryNotFoundException;
-import com.project.expense_tracker.exception.ExpenseNotFoundException;
-import com.project.expense_tracker.exception.InvalidExpenseException;
-import com.project.expense_tracker.model.Expense;
+import com.project.expense_tracker.dto.CreateExpenseRequest;
+import com.project.expense_tracker.dto.ExpenseResponse;
+import com.project.expense_tracker.dto.UpdateExpenseRequest;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -13,137 +12,40 @@ import java.util.Map;
 
 public interface ExpenseService {
 
-    /**
-     * Get all expenses
-     * @return List of all expenses
-     */
-    List<Expense> getAllExpenses();
+    List<ExpenseResponse> getAllExpenses();
 
-    /**
-     * Get expense by ID
-     * @param id Expense ID
-     * @return Expense if found
-     * @throws ExpenseNotFoundException if not found
-     */
-    Expense getExpenseById(Long id);
+    ExpenseResponse getExpenseById(Long id);
 
-    /**
-     * Create a new expense
-     * @param expense Expense to create
-     * @return Created expense with ID
-     * @throws CategoryNotFoundException if category not found
-     * @throws InvalidExpenseException if validation fails
-     */
-    Expense createExpense(Expense expense);
+    ExpenseResponse createExpense(CreateExpenseRequest request);
 
-    /**
-     * Update an existing expense
-     * @param id Expense ID
-     * @param expense Updated expense data
-     * @return Updated expense
-     * @throws ExpenseNotFoundException if not found
-     * @throws CategoryNotFoundException if category not found
-     */
-    Expense updateExpense(Long id, Expense expense);
+    ExpenseResponse updateExpense(Long id, UpdateExpenseRequest request);
 
-    /**
-     * Delete an expense
-     * @param id Expense ID
-     * @throws ExpenseNotFoundException if not found
-     */
     void deleteExpense(Long id);
 
-    /**
-     * Get expenses by category
-     * @param categoryId Category ID
-     * @return List of expenses in that category
-     * @throws CategoryNotFoundException if category not found
-     */
-    List<Expense> getExpensesByCategory(Long categoryId);
+    List<ExpenseResponse> getExpensesByCategory(Long categoryId);
 
-    /**
-     * Get expenses by date range
-     * @param startDate Start date (inclusive)
-     * @param endDate End date (inclusive)
-     * @return List of expenses in date range
-     * @throws InvalidExpenseException if date range is invalid
-     */
-    List<Expense> getExpensesByDateRange(LocalDate startDate, LocalDate endDate);
+    List<ExpenseResponse> getExpensesByDateRange(LocalDate startDate, LocalDate endDate);
 
-    /**
-     * Search expenses by description
-     * @param keyword Search keyword
-     * @return List of matching expenses
-     */
-    List<Expense> searchExpenses(String keyword);
+    List<ExpenseResponse> searchExpenses(String keyword);
 
-    /**
-     * Get expense summary statistics
-     * @return Map with total count, sum, and average
-     */
     Map<String, Object> getExpenseSummary();
 
-    /**
-     * Calculate total expenses by category
-     * @param categoryId Category ID
-     * @return Total amount for that category
-     */
     BigDecimal getTotalByCategory(Long categoryId);
 
-    /**
-     * Get monthly expenses for current year
-     * @return Map with month -> total amount
-     */
     Map<String, BigDecimal> getMonthlyExpenses();
 
-    /**
-     * Get top N most expensive expenses
-     */
-    List<Expense> getTopExpenses(int limit);
+    List<ExpenseResponse> getTopExpenses(int limit);
 
-    /**
-     * Get expenses above average amount
-     */
-    List<Expense> getExpensesAboveAverage();
+    List<ExpenseResponse> getExpensesAboveAverage();
 
-    /**
-     * Get current month's expenses
-     */
-    List<Expense> getCurrentMonthExpenses();
+    List<ExpenseResponse> getCurrentMonthExpenses();
 
-    /**
-     * Get detailed statistics for a date range
-     */
     List<Map<String, Object>> getDetailedStatsByDateRange(LocalDate startDate, LocalDate endDate);
 
-    /**
-     * Get daily spending for last 30 days
-     */
     List<Map<String, Object>> getDailySpendingTrend();
 
-    /**
-     * Search across description and category
-     */
-    List<Expense> searchAll(String keyword);
+    List<ExpenseResponse> searchAll(String keyword);
 
-    /**
-     * Get category breakdown with statistics
-     */
     List<Map<String, Object>> getCategoryBreakdown();
 
-    List<Expense> createMultipleExpenses(List<Expense> expenses);
-
-    void deleteExpensesByCategory(Long categoryId);
-
-    Map<String, BigDecimal> getSpendingByCategory();
-
-    void createExpenseWithIntentionalError();
-
-    List<Expense> getRecentExpenses(int days);
-
-    List<Expense> getThisWeekExpenses();
-    List<Expense> getLastWeekExpenses();
-    List<Expense> getThisYearExpenses();
-    List<Expense> getLastYearExpenses();
-    List<Expense> filterExpenses(Long categoryId, BigDecimal minAmount, BigDecimal maxAmount, LocalDate startDate, LocalDate endDate, String keyword);
 }
