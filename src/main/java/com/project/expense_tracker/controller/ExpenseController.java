@@ -1,5 +1,8 @@
 package com.project.expense_tracker.controller;
 
+import com.project.expense_tracker.dto.CreateExpenseRequest;
+import com.project.expense_tracker.dto.ExpenseResponse;
+import com.project.expense_tracker.dto.UpdateExpenseRequest;
 import com.project.expense_tracker.model.Expense;
 import com.project.expense_tracker.service.ExpenseService;
 import jakarta.validation.Valid;
@@ -27,26 +30,27 @@ public class ExpenseController {
     }
 
     @GetMapping
-    public ResponseEntity<List<Expense>> getAllExpenses() {
+    public ResponseEntity<List<ExpenseResponse>> getAllExpenses() {
         return ResponseEntity.ok(expenseService.getAllExpenses());
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Expense> getExpenseById(@PathVariable Long id) {
+    public ResponseEntity<ExpenseResponse> getExpenseById(@PathVariable Long id) {
         return ResponseEntity.ok(expenseService.getExpenseById(id));
     }
 
     @PostMapping
-    public ResponseEntity<Expense> createExpense(@Valid @RequestBody Expense expense) {
-        Expense created = expenseService.createExpense(expense);
+    public ResponseEntity<ExpenseResponse> createExpense(
+            @Valid @RequestBody CreateExpenseRequest request) {
+        ExpenseResponse created = expenseService.createExpense(request);
         return ResponseEntity.status(HttpStatus.CREATED).body(created);
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Expense> updateExpense(
+    public ResponseEntity<ExpenseResponse> updateExpense(
             @PathVariable Long id,
-            @Valid @RequestBody Expense expense) {
-        Expense updated = expenseService.updateExpense(id, expense);
+            @Valid @RequestBody UpdateExpenseRequest request) {
+        ExpenseResponse updated = expenseService.updateExpense(id, request);
         return ResponseEntity.ok(updated);
     }
 
@@ -57,19 +61,21 @@ public class ExpenseController {
     }
 
     @GetMapping("/category/{categoryId}")
-    public ResponseEntity<List<Expense>> getExpensesByCategory(@PathVariable Long categoryId) {
+    public ResponseEntity<List<ExpenseResponse>> getExpensesByCategory(
+            @PathVariable Long categoryId) {
         return ResponseEntity.ok(expenseService.getExpensesByCategory(categoryId));
     }
 
     @GetMapping("/date-range")
-    public ResponseEntity<List<Expense>> getExpensesByDateRange(
+    public ResponseEntity<List<ExpenseResponse>> getExpensesByDateRange(
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate) {
         return ResponseEntity.ok(expenseService.getExpensesByDateRange(startDate, endDate));
     }
 
     @GetMapping("/search")
-    public ResponseEntity<List<Expense>> searchExpenses(@RequestParam String keyword) {
+    public ResponseEntity<List<ExpenseResponse>> searchExpenses(
+            @RequestParam String keyword) {
         return ResponseEntity.ok(expenseService.searchExpenses(keyword));
     }
 
@@ -89,18 +95,18 @@ public class ExpenseController {
     }
 
     @GetMapping("/top")
-    public ResponseEntity<List<Expense>> getTopExpenses(
+    public ResponseEntity<List<ExpenseResponse>> getTopExpenses(
             @RequestParam(defaultValue = "10") int limit) {
         return ResponseEntity.ok(expenseService.getTopExpenses(limit));
     }
 
     @GetMapping("/above-average")
-    public ResponseEntity<List<Expense>> getExpensesAboveAverage() {
+    public ResponseEntity<List<ExpenseResponse>> getExpensesAboveAverage() {
         return ResponseEntity.ok(expenseService.getExpensesAboveAverage());
     }
 
     @GetMapping("/current-month")
-    public ResponseEntity<List<Expense>> getCurrentMonthExpenses() {
+    public ResponseEntity<List<ExpenseResponse>> getCurrentMonthExpenses() {
         return ResponseEntity.ok(expenseService.getCurrentMonthExpenses());
     }
 
@@ -117,7 +123,7 @@ public class ExpenseController {
     }
 
     @GetMapping("/search-all")
-    public ResponseEntity<List<Expense>> searchAll(@RequestParam String keyword) {
+    public ResponseEntity<List<ExpenseResponse>> searchAll(@RequestParam String keyword) {
         return ResponseEntity.ok(expenseService.searchAll(keyword));
     }
 
