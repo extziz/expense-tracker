@@ -1,9 +1,6 @@
 package com.project.expense_tracker.service;
 
-import com.project.expense_tracker.dto.CreateExpenseRequest;
-import com.project.expense_tracker.dto.ExpenseResponse;
-import com.project.expense_tracker.dto.ExpenseSummaryResponse;
-import com.project.expense_tracker.dto.UpdateExpenseRequest;
+import com.project.expense_tracker.dto.*;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -26,6 +23,8 @@ public interface ExpenseService {
     List<ExpenseSummaryResponse> getExpensesByCategory(Long categoryId);
 
     List<ExpenseSummaryResponse> getExpensesByDateRange(LocalDate startDate, LocalDate endDate);
+
+    List<ExpenseSummaryResponse> getExpensesByDateRange(DateRangeRequest request);
 
     List<ExpenseSummaryResponse> searchExpenses(String keyword);
 

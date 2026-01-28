@@ -1,9 +1,6 @@
 package com.project.expense_tracker.service;
 
-import com.project.expense_tracker.dto.CreateExpenseRequest;
-import com.project.expense_tracker.dto.ExpenseResponse;
-import com.project.expense_tracker.dto.ExpenseSummaryResponse;
-import com.project.expense_tracker.dto.UpdateExpenseRequest;
+import com.project.expense_tracker.dto.*;
 import com.project.expense_tracker.exception.CategoryNotFoundException;
 import com.project.expense_tracker.exception.ExpenseNotFoundException;
 import com.project.expense_tracker.exception.InvalidExpenseException;
@@ -15,6 +12,7 @@ import com.project.expense_tracker.repository.ExpenseRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.bind.annotation.GetMapping;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -255,6 +253,14 @@ public class ExpenseServiceImpl implements ExpenseService {
             breakdown.put("average", row[3]);
             return breakdown;
         }).collect(Collectors.toList());
+    }
+
+    @Override
+    @GetMapping("/filter")
+    public List<ExpenseSummaryResponse> getExpensesByDateRange(DateRangeRequest request){
+        request.validate();
+        List<Expense> results = expenseRepository.findByExpenseDateBetween(request.getStartDate(), request.getEndDate());
+        return expenseMapper.toResponseList(results);
     }
 }
 
