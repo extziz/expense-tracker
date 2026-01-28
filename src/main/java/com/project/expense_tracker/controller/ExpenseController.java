@@ -2,6 +2,7 @@ package com.project.expense_tracker.controller;
 
 import com.project.expense_tracker.dto.CreateExpenseRequest;
 import com.project.expense_tracker.dto.ExpenseResponse;
+import com.project.expense_tracker.dto.ExpenseSummaryResponse;
 import com.project.expense_tracker.dto.UpdateExpenseRequest;
 import com.project.expense_tracker.service.ExpenseService;
 import jakarta.validation.Valid;
@@ -29,7 +30,7 @@ public class ExpenseController {
     }
 
     @GetMapping
-    public ResponseEntity<List<ExpenseResponse>> getAllExpenses() {
+    public ResponseEntity<List<ExpenseSummaryResponse>> getAllExpenses() {
         return ResponseEntity.ok(expenseService.getAllExpenses());
     }
 
@@ -60,20 +61,20 @@ public class ExpenseController {
     }
 
     @GetMapping("/category/{categoryId}")
-    public ResponseEntity<List<ExpenseResponse>> getExpensesByCategory(
+    public ResponseEntity<List<ExpenseSummaryResponse>> getExpensesByCategory(
             @PathVariable Long categoryId) {
         return ResponseEntity.ok(expenseService.getExpensesByCategory(categoryId));
     }
 
     @GetMapping("/date-range")
-    public ResponseEntity<List<ExpenseResponse>> getExpensesByDateRange(
+    public ResponseEntity<List<ExpenseSummaryResponse>> getExpensesByDateRange(
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate) {
         return ResponseEntity.ok(expenseService.getExpensesByDateRange(startDate, endDate));
     }
 
     @GetMapping("/search")
-    public ResponseEntity<List<ExpenseResponse>> searchExpenses(
+    public ResponseEntity<List<ExpenseSummaryResponse>> searchExpenses(
             @RequestParam String keyword) {
         return ResponseEntity.ok(expenseService.searchExpenses(keyword));
     }
@@ -94,18 +95,18 @@ public class ExpenseController {
     }
 
     @GetMapping("/top")
-    public ResponseEntity<List<ExpenseResponse>> getTopExpenses(
+    public ResponseEntity<List<ExpenseSummaryResponse>> getTopExpenses(
             @RequestParam(defaultValue = "10") int limit) {
         return ResponseEntity.ok(expenseService.getTopExpenses(limit));
     }
 
     @GetMapping("/above-average")
-    public ResponseEntity<List<ExpenseResponse>> getExpensesAboveAverage() {
+    public ResponseEntity<List<ExpenseSummaryResponse>> getExpensesAboveAverage() {
         return ResponseEntity.ok(expenseService.getExpensesAboveAverage());
     }
 
     @GetMapping("/current-month")
-    public ResponseEntity<List<ExpenseResponse>> getCurrentMonthExpenses() {
+    public ResponseEntity<List<ExpenseSummaryResponse>> getCurrentMonthExpenses() {
         return ResponseEntity.ok(expenseService.getCurrentMonthExpenses());
     }
 
@@ -122,7 +123,7 @@ public class ExpenseController {
     }
 
     @GetMapping("/search-all")
-    public ResponseEntity<List<ExpenseResponse>> searchAll(@RequestParam String keyword) {
+    public ResponseEntity<List<ExpenseSummaryResponse>> searchAll(@RequestParam String keyword) {
         return ResponseEntity.ok(expenseService.searchAll(keyword));
     }
 

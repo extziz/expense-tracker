@@ -89,6 +89,10 @@ public class Category {
         this.createdAt = createdAt;
     }
 
+    public List<Expense> getExpenses() {
+        return expenses;
+    }
+
     @Override
     public String toString() {
         return "Category{" +

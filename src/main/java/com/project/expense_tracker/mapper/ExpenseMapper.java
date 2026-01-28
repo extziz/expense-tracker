@@ -2,6 +2,7 @@ package com.project.expense_tracker.mapper;
 
 import com.project.expense_tracker.dto.CreateExpenseRequest;
 import com.project.expense_tracker.dto.ExpenseResponse;
+import com.project.expense_tracker.dto.ExpenseSummaryResponse;
 import com.project.expense_tracker.dto.UpdateExpenseRequest;
 import com.project.expense_tracker.model.Expense;
 import org.mapstruct.*;
@@ -18,7 +19,7 @@ public interface ExpenseMapper {
     ExpenseResponse toResponse(Expense expense);
 
     // List conversion
-    List<ExpenseResponse> toResponseList(List<Expense> expenses);
+    List<ExpenseSummaryResponse> toResponseList(List<Expense> expenses);
 
     // Request DTO to Entity (ignore category, we'll set it separately)
     @Mapping(target = "id", ignore = true)

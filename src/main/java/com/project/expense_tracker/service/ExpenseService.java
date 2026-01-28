@@ -2,6 +2,7 @@ package com.project.expense_tracker.service;
 
 import com.project.expense_tracker.dto.CreateExpenseRequest;
 import com.project.expense_tracker.dto.ExpenseResponse;
+import com.project.expense_tracker.dto.ExpenseSummaryResponse;
 import com.project.expense_tracker.dto.UpdateExpenseRequest;
 
 import java.math.BigDecimal;
@@ -12,7 +13,7 @@ import java.util.Map;
 
 public interface ExpenseService {
 
-    List<ExpenseResponse> getAllExpenses();
+    List<ExpenseSummaryResponse> getAllExpenses();
 
     ExpenseResponse getExpenseById(Long id);
 
@@ -22,11 +23,11 @@ public interface ExpenseService {
 
     void deleteExpense(Long id);
 
-    List<ExpenseResponse> getExpensesByCategory(Long categoryId);
+    List<ExpenseSummaryResponse> getExpensesByCategory(Long categoryId);
 
-    List<ExpenseResponse> getExpensesByDateRange(LocalDate startDate, LocalDate endDate);
+    List<ExpenseSummaryResponse> getExpensesByDateRange(LocalDate startDate, LocalDate endDate);
 
-    List<ExpenseResponse> searchExpenses(String keyword);
+    List<ExpenseSummaryResponse> searchExpenses(String keyword);
 
     Map<String, Object> getExpenseSummary();
 
@@ -34,17 +35,17 @@ public interface ExpenseService {
 
     Map<String, BigDecimal> getMonthlyExpenses();
 
-    List<ExpenseResponse> getTopExpenses(int limit);
+    List<ExpenseSummaryResponse> getTopExpenses(int limit);
 
-    List<ExpenseResponse> getExpensesAboveAverage();
+    List<ExpenseSummaryResponse> getExpensesAboveAverage();
 
-    List<ExpenseResponse> getCurrentMonthExpenses();
+    List<ExpenseSummaryResponse> getCurrentMonthExpenses();
 
     List<Map<String, Object>> getDetailedStatsByDateRange(LocalDate startDate, LocalDate endDate);
 
     List<Map<String, Object>> getDailySpendingTrend();
 
-    List<ExpenseResponse> searchAll(String keyword);
+    List<ExpenseSummaryResponse> searchAll(String keyword);
 
     List<Map<String, Object>> getCategoryBreakdown();
 

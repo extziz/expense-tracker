@@ -2,6 +2,7 @@ package com.project.expense_tracker.service;
 
 import com.project.expense_tracker.dto.CreateExpenseRequest;
 import com.project.expense_tracker.dto.ExpenseResponse;
+import com.project.expense_tracker.dto.ExpenseSummaryResponse;
 import com.project.expense_tracker.dto.UpdateExpenseRequest;
 import com.project.expense_tracker.exception.CategoryNotFoundException;
 import com.project.expense_tracker.exception.ExpenseNotFoundException;
@@ -40,7 +41,7 @@ public class ExpenseServiceImpl implements ExpenseService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<ExpenseResponse> getAllExpenses() {
+    public List<ExpenseSummaryResponse> getAllExpenses() {
         List<Expense> expenses = expenseRepository.findAll();
         return expenseMapper.toResponseList(expenses);
     }
@@ -97,7 +98,7 @@ public class ExpenseServiceImpl implements ExpenseService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<ExpenseResponse> getExpensesByCategory(Long categoryId) {
+    public List<ExpenseSummaryResponse> getExpensesByCategory(Long categoryId) {
         if (!categoryRepository.existsById(categoryId)) {
             throw new CategoryNotFoundException(categoryId);
         }
@@ -107,7 +108,7 @@ public class ExpenseServiceImpl implements ExpenseService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<ExpenseResponse> getExpensesByDateRange(LocalDate startDate, LocalDate endDate) {
+    public List<ExpenseSummaryResponse> getExpensesByDateRange(LocalDate startDate, LocalDate endDate) {
         if (startDate.isAfter(endDate)) {
             throw new InvalidExpenseException("Start date must be before or equal to end date");
         }
@@ -117,7 +118,7 @@ public class ExpenseServiceImpl implements ExpenseService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<ExpenseResponse> searchExpenses(String keyword) {
+    public List<ExpenseSummaryResponse> searchExpenses(String keyword) {
         List<Expense> expenses = expenseRepository.findByDescriptionContainingIgnoreCase(keyword);
         return expenseMapper.toResponseList(expenses);
     }
@@ -146,9 +147,9 @@ public class ExpenseServiceImpl implements ExpenseService {
     @Override
     @Transactional(readOnly = true)
     public BigDecimal getTotalByCategory(Long categoryId) {
-        List<ExpenseResponse> expenses = getExpensesByCategory(categoryId);
+        List<ExpenseSummaryResponse> expenses = getExpensesByCategory(categoryId);
         return expenses.stream()
-                .map(ExpenseResponse::getAmount)
+                .map(ExpenseSummaryResponse::getAmount)
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
     }
 
@@ -181,7 +182,7 @@ public class ExpenseServiceImpl implements ExpenseService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<ExpenseResponse> getTopExpenses(int limit) {
+    public List<ExpenseSummaryResponse> getTopExpenses(int limit) {
         List<Expense> expenses = expenseRepository.findTop10ByOrderByAmountDesc();
         return expenseMapper.toResponseList(
                 expenses.stream().limit(limit).collect(Collectors.toList())
@@ -190,14 +191,14 @@ public class ExpenseServiceImpl implements ExpenseService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<ExpenseResponse> getExpensesAboveAverage() {
+    public List<ExpenseSummaryResponse> getExpensesAboveAverage() {
         List<Expense> expenses = expenseRepository.findExpensesAboveAverage();
         return expenseMapper.toResponseList(expenses);
     }
 
     @Override
     @Transactional(readOnly = true)
-    public List<ExpenseResponse> getCurrentMonthExpenses() {
+    public List<ExpenseSummaryResponse> getCurrentMonthExpenses() {
         List<Expense> expenses = expenseRepository.findCurrentMonthExpenses();
         return expenseMapper.toResponseList(expenses);
     }
@@ -236,7 +237,7 @@ public class ExpenseServiceImpl implements ExpenseService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<ExpenseResponse> searchAll(String keyword) {
+    public List<ExpenseSummaryResponse> searchAll(String keyword) {
         List<Expense> expenses = expenseRepository.searchByKeyword(keyword);
         return expenseMapper.toResponseList(expenses);
     }
