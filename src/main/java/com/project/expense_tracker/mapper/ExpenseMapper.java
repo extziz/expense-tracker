@@ -7,6 +7,8 @@ import com.project.expense_tracker.dto.UpdateExpenseRequest;
 import com.project.expense_tracker.model.Expense;
 import org.mapstruct.*;
 
+import java.time.LocalDate;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 
 @Mapper(componentModel = "spring")
@@ -35,4 +37,13 @@ public interface ExpenseMapper {
     @Mapping(target = "createdAt", ignore = true)
     @Mapping(target = "updatedAt", ignore = true)
     void updateEntityFromRequest(UpdateExpenseRequest request, @MappingTarget Expense expense);
+
+    default void calculateFields(@MappingTarget ExpenseResponse response, Expense expense){
+        String formattedAmount = "$" + expense.getAmount();
+        long dayDifference = ChronoUnit.DAYS.between(expense.getExpenseDate(), LocalDate.now());
+        String relativeDate = dayDifference + " days ago";
+
+        response.setFormattedAmount(formattedAmount);
+        response.setRelativeDate(relativeDate);
+    }
 }

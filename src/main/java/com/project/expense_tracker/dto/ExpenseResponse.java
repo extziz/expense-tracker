@@ -13,6 +13,9 @@ public class ExpenseResponse {
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 
+    private String formattedAmount;
+    private String relativeDate;
+
     // Category information (flattened)
     private Long categoryId;
     private String categoryName;
@@ -92,5 +95,21 @@ public class ExpenseResponse {
 
     public void setCategoryColor(String categoryColor) {
         this.categoryColor = categoryColor;
+    }
+
+    public String getFormattedAmount() {
+        return formattedAmount;
+    }
+
+    public void setFormattedAmount(String formattedAmount) {
+        this.formattedAmount = formattedAmount;
+    }
+
+    public String getRelativeDate() {
+        return relativeDate;
+    }
+
+    public void setRelativeDate(String relativeDate) {
+        this.relativeDate = relativeDate;
     }
 }
