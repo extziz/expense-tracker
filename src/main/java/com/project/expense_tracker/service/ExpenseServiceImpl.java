@@ -262,5 +262,17 @@ public class ExpenseServiceImpl implements ExpenseService {
         List<Expense> results = expenseRepository.findByExpenseDateBetween(request.getStartDate(), request.getEndDate());
         return expenseMapper.toResponseList(results);
     }
+
+    @GetMapping("/v1/expenses")
+    public List<ExpenseSummaryResponse> getAllExpensesV1(){
+        List<Expense> expenses = expenseRepository.findAll();
+        return expenseMapper.toResponseList(expenses);
+    }
+
+    @GetMapping("/v2/expenses")
+    public List<ExpenseResponse2> getAllExpensesV2(){
+        List<Expense> expenses = expenseRepository.findAll();
+        return expenseMapper.toResponse2List(expenses);
+    }
 }
 

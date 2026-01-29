@@ -4,8 +4,7 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
-public class ExpenseResponse {
-
+public class ExpenseResponse2 {
     private Long id;
     private BigDecimal amount;
     private String description;
@@ -13,13 +12,16 @@ public class ExpenseResponse {
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 
+    private String formattedAmount;
+    private String relativeDate;
+
     // Category information (flattened)
     private Long categoryId;
     private String categoryName;
     private String categoryColor;
 
     // Constructors
-    public ExpenseResponse() {}
+    public ExpenseResponse2() {}
 
     // Getters and Setters
     public Long getId() {
@@ -94,4 +96,19 @@ public class ExpenseResponse {
         this.categoryColor = categoryColor;
     }
 
+    public String getFormattedAmount() {
+        return formattedAmount;
+    }
+
+    public void setFormattedAmount(String formattedAmount) {
+        this.formattedAmount = formattedAmount;
+    }
+
+    public String getRelativeDate() {
+        return relativeDate;
+    }
+
+    public void setRelativeDate(String relativeDate) {
+        this.relativeDate = relativeDate;
+    }
 }
