@@ -5,7 +5,7 @@
 	<parent>
 		<groupId>org.springframework.boot</groupId>
 		<artifactId>spring-boot-starter-parent</artifactId>
-		<version>4.0.0</version> <relativePath/> </parent>
+		<version>3.4.1</version> <relativePath/> </parent>
 	<groupId>com.project</groupId>
 	<artifactId>expense-tracker</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
@@ -25,9 +25,24 @@
 		<url/>
 	</scm>
 	<properties>
+		<logback.version>1.5.25</logback.version>
+		<assertj.version>3.27.7</assertj.version>
 		<java.version>21</java.version> <org.mapstruct.version>1.5.5.Final</org.mapstruct.version>
 	</properties>
 	<dependencies>
+
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-test-autoconfigure</artifactId>
+			<scope>test</scope>
+		</dependency>
+
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-test</artifactId>
+			<scope>test</scope>
+		</dependency>
+
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-data-jpa</artifactId>
@@ -54,11 +69,6 @@
 			<groupId>com.h2database</groupId>
 			<artifactId>h2</artifactId>
 			<scope>runtime</scope>
-		</dependency>
-
-		<dependency>
-			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-starter-test</artifactId> <scope>test</scope>
 		</dependency>
 
 		<dependency>
