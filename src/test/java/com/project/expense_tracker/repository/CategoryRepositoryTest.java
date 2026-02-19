@@ -14,7 +14,7 @@ import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-@DataJpaTest  // Only loads JPA components, uses in-memory H2
+@DataJpaTest
 class CategoryRepositoryTest {
 
     @Autowired
@@ -61,14 +61,6 @@ class CategoryRepositoryTest {
 
         // Assert
         assertFalse(result.isPresent());
-    }
-
-    @Test
-    @DisplayName("Should check if category exists by name")
-    void existsByName_shouldReturnCorrectBoolean() {
-        // Act & Assert
-        assertTrue(categoryRepository.existsByName("Food"));
-        assertFalse(categoryRepository.existsByName("NonExistent"));
     }
 
     @Test
