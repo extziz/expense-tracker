@@ -7,9 +7,10 @@ import java.time.LocalDate;
 
 public class CreateExpenseRequest {
 
-    @NotNull(message = "Amount is required")
-    @DecimalMin(value = "0.01", message = "Amount must be greater than 0")
-    @Digits(integer = 10, fraction = 2, message = "Amount must have at most 2 decimal places")
+    // @NotNull(message = "Amount is required")
+    // @DecimalMin(value = "0.01", message = "Amount must be greater than 0")
+    // @Digits(integer = 10, fraction = 2, message = "Amount must have at most 2
+    // decimal places")
     private BigDecimal amount;
 
     @NotBlank(message = "Description is required")
@@ -24,7 +25,8 @@ public class CreateExpenseRequest {
     private LocalDate expenseDate;
 
     // Constructors
-    public CreateExpenseRequest() {}
+    public CreateExpenseRequest() {
+    }
 
     public CreateExpenseRequest(BigDecimal amount, String description, Long categoryId, LocalDate expenseDate) {
         this.amount = amount;

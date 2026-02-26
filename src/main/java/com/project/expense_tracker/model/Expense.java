@@ -16,11 +16,13 @@ public class Expense {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @NotNull(message = "Amount is required")
-    @DecimalMin(value = "0.01", message = "Amount must be greater than 0")
-    @DecimalMax(value = "1000000", message = "Amount must be lower than 1 000 000")
-    @Digits(integer = 10, fraction = 2, message = "Amount must have at most 2 decimal places")
-    @Column(nullable = false, precision = 12, scale = 2)
+    // @NotNull(message = "Amount is required")
+    // @DecimalMin(value = "0.01", message = "Amount must be greater than 0")
+    // @DecimalMax(value = "1000000", message = "Amount must be lower than 1 000
+    // 000")
+    // @Digits(integer = 10, fraction = 2, message = "Amount must have at most 2
+    // decimal places")
+    // @Column(nullable = false, precision = 12, scale = 2)
     private BigDecimal amount;
 
     @NotBlank(message = "Description is required")
@@ -57,7 +59,8 @@ public class Expense {
     }
 
     // Constructors
-    public Expense() {}
+    public Expense() {
+    }
 
     public Expense(BigDecimal amount, String description, Category category, LocalDate expenseDate) {
         this.amount = amount;
