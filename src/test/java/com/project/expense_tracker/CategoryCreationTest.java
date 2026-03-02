@@ -3,29 +3,23 @@ package com.project.expense_tracker;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+
+import static org.hamcrest.MatcherAssert.assertThat;
 
 import com.project.expense_tracker.dto.CreateCategoryRequest;
-import com.project.expense_tracker.mapper.CategoryMapper;
-import com.project.expense_tracker.repository.CategoryRepository;
-import com.project.expense_tracker.service.CategoryServiceImpl;
+import com.project.expense_tracker.model.Category;
+import com.project.expense_tracker.service.CategoryService;
 
-@ExtendWith(MockitoExtension.class)
+@SpringBootTest
 public class CategoryCreationTest {
 
-    @Mock
-    CategoryRepository categoryRepository;
-
-    @Mock
-    CategoryMapper categoryMapper;
-
-    @InjectMocks
-    CategoryServiceImpl categoryService;
+    @Autowired
+    CategoryService categoryService;
 
     CreateCategoryRequest createRequest;
 
@@ -37,6 +31,7 @@ public class CategoryCreationTest {
             "'', #FF5733, false"
     })
     void validateCategoryCreation(String name, String color, boolean shouldPass) {
+
         createRequest = new CreateCategoryRequest(
                 name,
                 color,
@@ -47,5 +42,12 @@ public class CategoryCreationTest {
         } else {
             assertThrows(Exception.class, () -> categoryService.createCategory(createRequest));
         }
+    }
+
+    @Test
+    void verifyCategoryColorFormat() {
+        Category myCategory = new Category("Food", "#FF5733", "");
+
+        assertThat(myCategory, CategoryMatcher.hasValidColor());
     }
 }
