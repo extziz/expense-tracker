@@ -10,85 +10,84 @@ import java.util.concurrent.Executors;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
 
-import com.project.expense_tracker.dto.CreateCategoryRequest;
 import com.project.expense_tracker.dto.CreateExpenseRequest;
 import com.project.expense_tracker.model.Category;
-import com.project.expense_tracker.model.Expense;
+import com.project.expense_tracker.repository.CategoryRepository;
 import com.project.expense_tracker.repository.ExpenseRepository;
-import com.project.expense_tracker.service.ExpenseServiceImpl;
+import com.project.expense_tracker.service.ExpenseService;
 
-@ExtendWith(MockitoExtension.class)
+// 1. Use SpringBootTest so we have a REAL database and REAL service
+@SpringBootTest
 public class ConcurrencyTest {
-    @Mock
+
+    // 2. Use Autowired to bring in the real Spring Beans
+    @Autowired
     private ExpenseRepository expenseRepository;
 
-    @InjectMocks
-    private ExpenseServiceImpl expenseService;
+    @Autowired
+    private CategoryRepository categoryRepository;
+
+    @Autowired
+    private ExpenseService expenseService;
 
     private Category testCategory;
     private CreateExpenseRequest createRequest;
 
     @BeforeEach
     void setUp() {
+        // Clear the database before starting
+        expenseRepository.deleteAll();
+        categoryRepository.deleteAll();
+
+        // Create and SAVE a real category to the database
         testCategory = new Category();
-        testCategory.setId(1L);
         testCategory.setName("Food");
         testCategory.setColor("#FF5733");
+        testCategory = categoryRepository.save(testCategory);
+
+        // 3. Initialize the request
+        createRequest = new CreateExpenseRequest(
+                new BigDecimal("15.00"),
+                "Concurrent Coffee",
+                testCategory.getId(),
+                LocalDate.now());
     }
 
     @Test
     void createExpense_whenConcurrent_shouldHandleRaceCondition() throws InterruptedException {
         int numberOfThreads = 10;
-
-        // 1. Create a "pool" of 10 separate threads (like 10 separate users)
         ExecutorService executorService = Executors.newFixedThreadPool(numberOfThreads);
+        CountDownLatch startLatch = new CountDownLatch(1);
+        CountDownLatch doneLatch = new CountDownLatch(numberOfThreads);
 
-        // 2. Set up our Start Line and Finish Line
-        CountDownLatch startLatch = new CountDownLatch(1); // The starting pistol
-        CountDownLatch doneLatch = new CountDownLatch(numberOfThreads); // The finish line
-
-        // 3. Queue up the 10 tasks
         for (int i = 0; i < numberOfThreads; i++) {
             executorService.submit(() -> {
                 try {
-                    // ALL 10 threads hit this line and freeze, waiting for the startLatch to drop
-                    // to 0
                     startLatch.await();
 
-                    // --- THE ACTUAL ACTION ---
-                    // Create and save the expense.
-                    // Note: If you have an ExpenseService, call it here instead of the repository.
-                    Expense concurrentExpense = expenseService.createExpense(createRequest);
-                    expenseRepository.save(concurrentExpense);
+                    expenseService.createExpense(createRequest);
 
                 } catch (InterruptedException e) {
                     Thread.currentThread().interrupt();
+                } catch (Exception e) {
+                    System.err.println("Thread failed: " + e.getMessage());
                 } finally {
-                    // As each thread finishes saving, it crosses the finish line
                     doneLatch.countDown();
                 }
             });
         }
 
-        // 4. FIRE THE STARTING PISTOL!
-        // This drops the startLatch to 0. All 10 frozen threads instantly wake up and
-        // try to save at the same time.
+        // FIRE THE STARTING PISTOL
         startLatch.countDown();
 
-        // 5. Wait for everyone to finish
-        // The main test pauses here until all 10 threads have called
-        // doneLatch.countDown()
+        // Wait for everyone to finish
         doneLatch.await();
         executorService.shutdown();
 
-        // 6. Assert the results
-        // If the database handled the concurrency correctly, there should be exactly 10
-        // new records.
+        // Assert the results against the REAL database
         long totalExpenses = expenseRepository.count();
         assertEquals(10, totalExpenses, "Exactly 10 expenses should have been created concurrently");
     }
