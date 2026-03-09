@@ -45,6 +45,16 @@ public class User implements UserDetails {
         createdAt = LocalDateTime.now();
     }
 
+    @Override
+    public String getUsername() {
+        return username;
+    }
+
+    @Override
+    public String getPassword() {
+        return password;
+    }
+
     // ── UserDetails contract ─────────────────────────────────────────────────
 
     @Override
