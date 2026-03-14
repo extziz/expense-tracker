@@ -34,6 +34,10 @@ public class Expense {
     @JoinColumn(name = "category_id", nullable = false)
     private Category category;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id", nullable = false)
+    private User user;
+
     @NotNull(message = "Expense date is required")
     @PastOrPresent(message = "Expense date cannot be in the future")
     @Column(name = "expense_date", nullable = false)
@@ -123,6 +127,10 @@ public class Expense {
     public void setUpdatedAt(LocalDateTime updatedAt) {
         this.updatedAt = updatedAt;
     }
+
+    public User getUser()          { return user; }
+
+    public void setUser(User user) { this.user = user; }
 
     @Override
     public String toString() {
